@@ -319,6 +319,7 @@
             text-decoration: none;
             transition: var(--transition);
             border-left: 4px solid transparent;
+            cursor: pointer;
         }
         
         .sidebar-item:hover, .sidebar-item.active {
@@ -557,14 +558,17 @@
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
+                width: 280px;
             }
             
             .sidebar.active {
                 transform: translateX(0);
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             }
             
             .main-content {
                 margin-left: 0;
+                padding: 1rem;
             }
             
             .toggle-sidebar {
@@ -573,6 +577,22 @@
             
             .hero-title {
                 font-size: 2.8rem;
+            }
+            
+            /* Overlay for sidebar on mobile */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
             }
         }
         
@@ -711,6 +731,24 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        
+        /* Close sidebar on mobile after click */
+        .sidebar-close {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-color);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar-close {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -721,6 +759,9 @@
 
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
     <!-- Home Page -->
     <div id="homePage">
@@ -1074,6 +1115,9 @@
                 <div class="sidebar-logo">
                     <i class="fas fa-map-marker-alt me-2"></i> GSAMS
                 </div>
+                <button class="sidebar-close" onclick="closeSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
             <div class="sidebar-menu">
@@ -1729,6 +1773,13 @@
                         <!-- Tab 2: Form Builder -->
                         <div class="tab-pane fade" id="form" role="tabpanel">
                             <div class="form-builder-container">
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="requireForm">
+                                    <label class="form-check-label" for="requireForm">
+                                        <strong>Require attendees to fill this form</strong> (Meeting cannot be created without at least one field)
+                                    </label>
+                                </div>
+                                
                                 <h5 class="mb-4">Custom Attendance Form Builder</h5>
                                 <p class="text-muted mb-4">Add custom fields that attendees will fill when joining the meeting.</p>
                                 
@@ -1957,6 +2008,23 @@
             
             // Initialize form builder
             initializeFormBuilder();
+            
+            // Close sidebar when clicking overlay
+            document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const toggleBtn = document.getElementById('toggleSidebar');
+                
+                if (window.innerWidth <= 992) {
+                    if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target) && 
+                        sidebar.classList.contains('active')) {
+                        closeSidebar();
+                    }
+                }
+            });
         });
         
         // Check authentication status
@@ -2037,6 +2105,9 @@
         
         // Show/hide dashboard sections
         function showDashboardSection(section) {
+            // Close sidebar on mobile
+            closeSidebar();
+            
             // Hide all sections
             const sections = document.querySelectorAll('.dashboard-section');
             sections.forEach(sec => {
@@ -2048,6 +2119,9 @@
             menuItems.forEach(item => {
                 item.classList.remove('active');
             });
+            
+            // Mark clicked item as active
+            event.target.classList.add('active');
             
             // Show selected section
             document.getElementById(section).style.display = 'block';
@@ -2082,7 +2156,27 @@
         // Toggle sidebar on mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
             sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Prevent body scroll when sidebar is open
+            if (sidebar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Close sidebar on mobile
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
         
         // Initialize form builder
@@ -2324,6 +2418,26 @@
             preview.innerHTML = previewHTML;
         }
         
+        // Validate meeting creation form
+        function validateMeetingCreation() {
+            // Validate basic meeting details
+            if (!validateMeetingDetails()) {
+                showToast('Please fill in all required meeting details', 'error');
+                return false;
+            }
+            
+            // Validate form builder (at least one field if form is required)
+            const meetingFormRequired = document.getElementById('requireForm')?.checked || false;
+            if (meetingFormRequired && currentMeetingFormFields.length === 0) {
+                showToast('Form is required but no fields added. Please add at least one field.', 'error');
+                // Switch to form tab
+                document.querySelector('#form-tab').click();
+                return false;
+            }
+            
+            return true;
+        }
+        
         // Tab navigation for create meeting modal
         function nextTab() {
             const currentTab = document.querySelector('#meetingTabs .nav-link.active');
@@ -2338,6 +2452,12 @@
                 if (currentIndex === 0) { // Details tab
                     if (!validateMeetingDetails()) {
                         showToast('Please fill in all required meeting details', 'error');
+                        return;
+                    }
+                } else if (currentIndex === 1) { // Form builder tab
+                    const requireForm = document.getElementById('requireForm')?.checked || false;
+                    if (requireForm && currentMeetingFormFields.length === 0) {
+                        showToast('Form is required but no fields added. Please add at least one field.', 'error');
                         return;
                     }
                 }
@@ -2756,13 +2876,11 @@
             document.getElementById('allowManual').checked = currentOrganization.settings.allowManual;
         }
         
-        // Create meeting (UPDATED with form fields)
+        // Create meeting
         async function createMeeting() {
             try {
-                // Validate meeting details
-                if (!validateMeetingDetails()) {
-                    // Switch back to details tab
-                    document.querySelector('#meetingTabs .nav-link').click();
+                // Validate complete meeting creation form
+                if (!validateMeetingCreation()) {
                     return;
                 }
                 
@@ -2787,7 +2905,8 @@
                             kiosk: document.getElementById('allowKioskMeeting').checked,
                             manual: document.getElementById('allowManualMeeting').checked
                         },
-                        customFormFields: currentMeetingFormFields
+                        customFormFields: currentMeetingFormFields,
+                        requireForm: document.getElementById('requireForm')?.checked || false
                     }
                 };
                 
@@ -2817,6 +2936,10 @@
                     document.getElementById('shareEmailBtn').disabled = false;
                     document.getElementById('shareWhatsAppBtn').disabled = false;
                     document.getElementById('shareSMSBtn').disabled = false;
+                    
+                    // Reload meetings list
+                    loadMeetings();
+                    loadUpcomingMeetings();
                     
                 } else {
                     const error = await response.json();
@@ -3031,7 +3154,7 @@
             }
         }
         
-        // Show create meeting modal (UPDATED to reset form builder)
+        // Show create meeting modal
         function showCreateMeetingModal() {
             // Reset form builder
             currentMeetingFormFields = [];
@@ -3069,7 +3192,7 @@
             modal.show();
         }
         
-        // Show meeting details modal (UPDATED with sharing info)
+        // Show meeting details modal
         function showMeetingDetailsModal(meetingId) {
             // Fetch meeting details
             fetch(`${API_BASE_URL}/meetings/${meetingId}`, {
@@ -3090,7 +3213,14 @@
                 document.getElementById('meetingDetailsContent').innerHTML = `
                     <div class="row">
                         <div class="col-md-8">
-                            <h5>${meeting.title}</h5>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5>${meeting.title}</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMeeting('${meeting._id}')">
+                                        <i class="fas fa-trash me-1"></i> Delete Meeting
+                                    </button>
+                                </div>
+                            </div>
                             <p class="text-muted">${meeting.description || 'No description provided'}</p>
                             
                             <div class="row mt-4">
@@ -3098,6 +3228,7 @@
                                     <h6><i class="fas fa-calendar me-2"></i> Schedule</h6>
                                     <p><strong>Start:</strong> ${startTime.toLocaleString()}</p>
                                     <p><strong>End:</strong> ${endTime.toLocaleString()}</p>
+                                    <p><strong>Status:</strong> ${getMeetingStatusBadge(meeting.status)}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <h6><i class="fas fa-map-marker-alt me-2"></i> Location</h6>
@@ -3121,11 +3252,12 @@
                             ${meeting.attendanceConfig.customFormFields && meeting.attendanceConfig.customFormFields.length > 0 ? `
                                 <div class="mt-4">
                                     <h6><i class="fas fa-list-alt me-2"></i> Custom Form Fields</h6>
+                                    <p class="text-muted small">${meeting.attendanceConfig.requireForm ? 'Required' : 'Optional'} for attendees</p>
                                     <ul class="list-group mt-2">
                                         ${meeting.attendanceConfig.customFormFields.map(field => `
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 ${field.label}
-                                                <span class="badge bg-secondary">${field.type}</span>
+                                                <span class="badge bg-secondary">${field.type} ${field.required ? ' (Required)' : ''}</span>
                                             </li>
                                         `).join('')}
                                     </ul>
@@ -3143,9 +3275,12 @@
                                         <a href="${meetingLink}" target="_blank">${meetingLink}</a>
                                     </div>
                                     
-                                    <div class="d-grid gap-2 mb-3">
-                                        <button class="btn btn-sm btn-primary-custom" onclick="copyTextToClipboard('${meetingLink}')">
+                                    <div class="d-flex gap-2 mb-3">
+                                        <button class="btn btn-sm btn-primary-custom flex-grow-1" onclick="copyTextToClipboard('${meetingLink}')">
                                             <i class="fas fa-copy me-1"></i> Copy Link
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-custom" onclick="window.open('${meetingLink}', '_blank')">
+                                            <i class="fas fa-external-link-alt"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -3155,7 +3290,7 @@
                                     <div id="meetingQRCode" class="mt-2 mb-3">
                                         ${qrCodeHTML}
                                     </div>
-                                    <button class="btn btn-sm btn-outline-custom w-100" onclick="downloadMeetingQRCode('${meetingLink}', '${meeting.title}')">
+                                    <button class="btn btn-sm btn-primary-custom w-100" onclick="downloadMeetingQRCode('${meetingLink}', '${meeting.title}')">
                                         <i class="fas fa-download me-1"></i> Download QR Code
                                     </button>
                                 </div>
@@ -3197,6 +3332,18 @@
             });
         }
         
+        // Helper function for meeting status badge
+        function getMeetingStatusBadge(status) {
+            switch(status) {
+                case 'draft': return '<span class="badge bg-secondary">Draft</span>';
+                case 'active': return '<span class="badge bg-success">Active</span>';
+                case 'in_progress': return '<span class="badge bg-primary">In Progress</span>';
+                case 'completed': return '<span class="badge bg-info">Completed</span>';
+                case 'cancelled': return '<span class="badge bg-danger">Cancelled</span>';
+                default: return '<span class="badge bg-secondary">Unknown</span>';
+            }
+        }
+        
         // Helper function to copy text to clipboard
         function copyTextToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
@@ -3225,6 +3372,40 @@
                 
                 showToast('QR code downloaded!', 'success');
             });
+        }
+        
+        // Delete meeting
+        async function deleteMeeting(meetingId) {
+            if (!confirm('Are you sure you want to delete this meeting? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/meetings/${meetingId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('Meeting deleted successfully!', 'success');
+                    // Reload meetings
+                    loadMeetings();
+                    loadUpcomingMeetings();
+                    // Update dashboard stats
+                    loadDashboardData();
+                    // Close modal if open
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('meetingDetailsModal'));
+                    if (modal) modal.hide();
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Failed to delete meeting', 'error');
+                }
+            } catch (error) {
+                console.error('Delete meeting error:', error);
+                showToast('Failed to delete meeting', 'error');
+            }
         }
         
         // Export report
@@ -3776,13 +3957,6 @@
         function startMeeting(meetingId) {
             showToast('Starting meeting...', 'info');
             // In a real implementation, this would call the API
-        }
-        
-        function deleteMeeting(meetingId) {
-            if (confirm('Are you sure you want to delete this meeting?')) {
-                showToast('Deleting meeting...', 'info');
-                // In a real implementation, this would call the API
-            }
         }
         
         function viewAttendanceDetails(attendanceId) {
