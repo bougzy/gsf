@@ -17,6 +17,9 @@
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
     <style>
         :root {
             --primary-color: #4361ee;
@@ -470,6 +473,86 @@
             color: var(--primary-color);
         }
         
+        /* New styles for meeting sharing features */
+        .share-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .share-link-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .share-link {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 0.9rem;
+            border: 1px dashed #ccc;
+        }
+        
+        .qr-code-container {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .qr-code-canvas {
+            max-width: 250px;
+            height: auto;
+            margin: 0 auto;
+        }
+        
+        .form-builder-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #eee;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .form-field-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            transition: var(--transition);
+        }
+        
+        .form-field-item:hover {
+            background: #e9ecef;
+        }
+        
+        .field-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .preview-form {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            border: 2px dashed #dee2e6;
+        }
+        
+        /* Modal adjustments for new features */
+        .modal-xl {
+            max-width: 1200px;
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -660,9 +743,6 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#how-it-works">How It Works</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#pricing">Pricing</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#contact">Contact</a>
@@ -1471,7 +1551,7 @@
                                     <p class="small text-muted mb-3">Use these endpoints to integrate with your applications:</p>
                                     <div class="mb-3">
                                         <label class="form-label small">Base URL</label>
-                                        <code class="d-block p-2 bg-light rounded">https://gsb-hrs3.onrender.com/api</code>
+                                        <code class="d-block p-2 bg-light rounded">https://gsf-inky.vercel.app/api</code>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label small">Your API Key</label>
@@ -1544,96 +1624,234 @@
     
     <!-- Create Meeting Modal -->
     <div class="modal fade" id="createMeetingModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content modal-custom">
                 <div class="modal-header modal-header-custom">
                     <h5 class="modal-title">Create New Meeting</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="createMeetingForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Meeting Title</label>
-                                <input type="text" class="form-control" id="meetingTitle" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Location Name</label>
-                                <input type="text" class="form-control" id="meetingLocationName" required>
+                    <ul class="nav nav-tabs" id="meetingTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">Meeting Details</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="form-tab" data-bs-toggle="tab" data-bs-target="#form" type="button" role="tab">Attendance Form</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sharing-tab" data-bs-toggle="tab" data-bs-target="#sharing" type="button" role="tab">Share & QR Code</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-4" id="meetingTabsContent">
+                        <!-- Tab 1: Meeting Details -->
+                        <div class="tab-pane fade show active" id="details" role="tabpanel">
+                            <form id="createMeetingForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Meeting Title *</label>
+                                        <input type="text" class="form-control" id="meetingTitle" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Location Name *</label>
+                                        <input type="text" class="form-control" id="meetingLocationName" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" id="meetingDescription" rows="3"></textarea>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Start Date & Time *</label>
+                                        <input type="datetime-local" class="form-control" id="meetingStartTime" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">End Date & Time *</label>
+                                        <input type="datetime-local" class="form-control" id="meetingEndTime" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Latitude *</label>
+                                        <input type="number" step="any" class="form-control" id="meetingLatitude" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Longitude *</label>
+                                        <input type="number" step="any" class="form-control" id="meetingLongitude" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Location Radius (meters)</label>
+                                    <input type="number" class="form-control" id="meetingRadius" value="100" min="10" max="1000">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Attendance Methods</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allowGPSMeeting" checked>
+                                        <label class="form-check-label" for="allowGPSMeeting">
+                                            Smartphone GPS
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allowSMSMeeting" checked>
+                                        <label class="form-check-label" for="allowSMSMeeting">
+                                            SMS
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allowUSSDMeeting" checked>
+                                        <label class="form-check-label" for="allowUSSDMeeting">
+                                            USSD
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allowKioskMeeting" checked>
+                                        <label class="form-check-label" for="allowKioskMeeting">
+                                            Kiosk
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allowManualMeeting" checked>
+                                        <label class="form-check-label" for="allowManualMeeting">
+                                            Manual
+                                        </label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Tab 2: Form Builder -->
+                        <div class="tab-pane fade" id="form" role="tabpanel">
+                            <div class="form-builder-container">
+                                <h5 class="mb-4">Custom Attendance Form Builder</h5>
+                                <p class="text-muted mb-4">Add custom fields that attendees will fill when joining the meeting.</p>
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-4">
+                                            <h6>Form Fields</h6>
+                                            <div id="formFieldsList">
+                                                <div class="alert alert-info">
+                                                    No fields added yet. Click "Add Field" to create your first form field.
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-4">
+                                                <button class="btn btn-outline-custom" onclick="addFormField()">
+                                                    <i class="fas fa-plus me-2"></i> Add Field
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="addDefaultFields()">
+                                                    <i class="fas fa-magic me-2"></i> Add Default Fields
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <div class="preview-form">
+                                            <h6>Form Preview</h6>
+                                            <div id="formPreview">
+                                                <p class="text-muted small">Form preview will appear here</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" id="meetingDescription" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Start Date & Time</label>
-                                <input type="datetime-local" class="form-control" id="meetingStartTime" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">End Date & Time</label>
-                                <input type="datetime-local" class="form-control" id="meetingEndTime" required>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Latitude</label>
-                                <input type="number" step="any" class="form-control" id="meetingLatitude" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Longitude</label>
-                                <input type="number" step="any" class="form-control" id="meetingLongitude" required>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Location Radius (meters)</label>
-                            <input type="number" class="form-control" id="meetingRadius" value="100" min="10" max="1000">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Attendance Methods</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="allowGPSMeeting" checked>
-                                <label class="form-check-label" for="allowGPSMeeting">
-                                    Smartphone GPS
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="allowSMSMeeting" checked>
-                                <label class="form-check-label" for="allowSMSMeeting">
-                                    SMS
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="allowUSSDMeeting" checked>
-                                <label class="form-check-label" for="allowUSSDMeeting">
-                                    USSD
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="allowKioskMeeting" checked>
-                                <label class="form-check-label" for="allowKioskMeeting">
-                                    Kiosk
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="allowManualMeeting" checked>
-                                <label class="form-check-label" for="allowManualMeeting">
-                                    Manual
-                                </label>
+                        <!-- Tab 3: Sharing & QR Code -->
+                        <div class="tab-pane fade" id="sharing" role="tabpanel">
+                            <div class="share-section">
+                                <h5 class="mb-4">Share Meeting</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="share-link-container">
+                                            <h6><i class="fas fa-link me-2"></i> Meeting Link</h6>
+                                            <p class="text-muted small mb-3">Share this link with attendees to join the meeting:</p>
+                                            <div class="share-link" id="generatedLink">
+                                                <span class="text-muted">Link will be generated after meeting creation</span>
+                                            </div>
+                                            <div class="mt-3 d-flex gap-2">
+                                                <button class="btn btn-sm btn-primary-custom" onclick="copyMeetingLink()" id="copyLinkBtn" disabled>
+                                                    <i class="fas fa-copy me-1"></i> Copy Link
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-custom" onclick="testMeetingLink()" id="testLinkBtn" disabled>
+                                                    <i class="fas fa-external-link-alt me-1"></i> Test Link
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-4">
+                                        <div class="qr-code-container">
+                                            <h6><i class="fas fa-qrcode me-2"></i> QR Code</h6>
+                                            <p class="text-muted small mb-3">Scan this code to join the meeting:</p>
+                                            <div id="qrCodeCanvas"></div>
+                                            <div class="mt-3">
+                                                <button class="btn btn-sm btn-primary-custom" onclick="downloadQRCode()" id="downloadQRBtn" disabled>
+                                                    <i class="fas fa-download me-1"></i> Download QR Code
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h6><i class="fas fa-share-alt me-2"></i> Share via</h6>
+                                    <div class="d-flex gap-2 mt-3">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="shareViaEmail()" id="shareEmailBtn" disabled>
+                                            <i class="fas fa-envelope me-1"></i> Email
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="shareViaWhatsApp()" id="shareWhatsAppBtn" disabled>
+                                            <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="shareViaSMS()" id="shareSMSBtn" disabled>
+                                            <i class="fas fa-sms me-1"></i> SMS
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="d-flex justify-content-end">
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <button class="btn btn-outline-secondary" onclick="prevTab()">
+                                <i class="fas fa-arrow-left me-2"></i> Previous
+                            </button>
+                            <button class="btn btn-outline-secondary ms-2" onclick="nextTab()">
+                                Next <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                        <div>
                             <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary-custom">Create Meeting</button>
+                            <button type="button" class="btn btn-primary-custom" onclick="createMeeting()">Create Meeting</button>
                         </div>
-                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meeting Details Modal -->
+    <div class="modal fade" id="meetingDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content modal-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">Meeting Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="meetingDetailsContent">
+                        <!-- Filled by JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -1686,23 +1904,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Meeting Details Modal -->
-    <div class="modal fade" id="meetingDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content modal-custom">
-                <div class="modal-header modal-header-custom">
-                    <h5 class="modal-title">Meeting Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="meetingDetailsContent">
-                        <!-- Filled by JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -1726,9 +1927,14 @@
         let authToken = null;
         let currentOrganization = null;
         let attendanceChart = null;
+        let currentMeetingFormFields = [];
+        let generatedMeetingLink = '';
+        let generatedQRCode = '';
+        let currentMeetingCode = '';
         
         // API Base URL
-        const API_BASE_URL = 'https://gsb-hrs3.onrender.com/api';
+        const API_BASE_URL = 'https://gsf-inky.vercel.app/api';
+        const FRONTEND_URL = 'https://gsf-inky.vercel.app';
         
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1748,6 +1954,9 @@
             
             // Setup sidebar toggle
             document.getElementById('toggleSidebar').addEventListener('click', toggleSidebar);
+            
+            // Initialize form builder
+            initializeFormBuilder();
         });
         
         // Check authentication status
@@ -1777,12 +1986,6 @@
             document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 loginUser();
-            });
-            
-            // Create meeting form
-            document.getElementById('createMeetingForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                createMeeting();
             });
             
             // Create admin form
@@ -1880,6 +2083,339 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('active');
+        }
+        
+        // Initialize form builder
+        function initializeFormBuilder() {
+            currentMeetingFormFields = [];
+            updateFormPreview();
+        }
+        
+        // Add form field
+        function addFormField(type = 'text', label = '', placeholder = '', required = false, options = []) {
+            const fieldId = 'field_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            const field = {
+                id: fieldId,
+                type: type || 'text',
+                label: label || 'New Field',
+                placeholder: placeholder || 'Enter value',
+                required: required || false,
+                options: options || []
+            };
+            
+            currentMeetingFormFields.push(field);
+            renderFormField(field);
+            updateFormPreview();
+        }
+        
+        // Add default fields
+        function addDefaultFields() {
+            // Clear existing fields
+            currentMeetingFormFields = [];
+            document.getElementById('formFieldsList').innerHTML = '';
+            
+            // Add default fields
+            addFormField('text', 'Full Name', 'Enter your full name', true);
+            addFormField('email', 'Email Address', 'Enter your email address', false);
+            addFormField('tel', 'Phone Number', 'Enter your phone number', true);
+            addFormField('text', 'Employee/Student ID', 'Enter your ID number', false);
+            addFormField('select', 'Department', 'Select your department', false, ['IT', 'HR', 'Finance', 'Operations', 'Marketing']);
+            addFormField('textarea', 'Comments', 'Any additional comments', false);
+            
+            showToast('Default fields added successfully', 'success');
+        }
+        
+        // Render form field in builder
+        function renderFormField(field) {
+            const fieldsList = document.getElementById('formFieldsList');
+            
+            // Remove the "no fields" message if it exists
+            const alert = fieldsList.querySelector('.alert');
+            if (alert) {
+                alert.remove();
+            }
+            
+            const fieldElement = document.createElement('div');
+            fieldElement.className = 'form-field-item';
+            fieldElement.id = 'fieldItem_' + field.id;
+            
+            let optionsHTML = '';
+            if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
+                optionsHTML = `
+                    <div class="mt-2">
+                        <small class="text-muted">Options (one per line):</small>
+                        <textarea class="form-control form-control-sm" rows="2" onchange="updateFieldOptions('${field.id}', this.value)">${field.options.join('\n')}</textarea>
+                    </div>
+                `;
+            }
+            
+            fieldElement.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">${field.label} <span class="badge bg-secondary">${field.type}</span></h6>
+                        <small class="text-muted">${field.placeholder}</small>
+                        ${field.required ? '<span class="badge bg-danger ms-2">Required</span>' : ''}
+                    </div>
+                    <div class="field-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editField('${field.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeField('${field.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                ${optionsHTML}
+            `;
+            
+            fieldsList.appendChild(fieldElement);
+        }
+        
+        // Update field options
+        function updateFieldOptions(fieldId, optionsText) {
+            const field = currentMeetingFormFields.find(f => f.id === fieldId);
+            if (field) {
+                field.options = optionsText.split('\n').filter(opt => opt.trim() !== '');
+                updateFormPreview();
+            }
+        }
+        
+        // Edit field
+        function editField(fieldId) {
+            const field = currentMeetingFormFields.find(f => f.id === fieldId);
+            if (!field) return;
+            
+            const newLabel = prompt('Enter field label:', field.label);
+            if (newLabel === null) return;
+            
+            const newPlaceholder = prompt('Enter field placeholder:', field.placeholder);
+            if (newPlaceholder === null) return;
+            
+            const isRequired = confirm('Is this field required?');
+            
+            field.label = newLabel;
+            field.placeholder = newPlaceholder;
+            field.required = isRequired;
+            
+            // Update the field element
+            const fieldElement = document.getElementById('fieldItem_' + fieldId);
+            if (fieldElement) {
+                fieldElement.querySelector('h6').innerHTML = `${field.label} <span class="badge bg-secondary">${field.type}</span>`;
+                fieldElement.querySelector('small').textContent = field.placeholder;
+                
+                const requiredBadge = fieldElement.querySelector('.badge.bg-danger');
+                if (field.required && !requiredBadge) {
+                    fieldElement.querySelector('h6').innerHTML += ' <span class="badge bg-danger">Required</span>';
+                } else if (!field.required && requiredBadge) {
+                    requiredBadge.remove();
+                }
+            }
+            
+            updateFormPreview();
+            showToast('Field updated successfully', 'success');
+        }
+        
+        // Remove field
+        function removeField(fieldId) {
+            if (!confirm('Are you sure you want to remove this field?')) return;
+            
+            currentMeetingFormFields = currentMeetingFormFields.filter(f => f.id !== fieldId);
+            const fieldElement = document.getElementById('fieldItem_' + fieldId);
+            if (fieldElement) {
+                fieldElement.remove();
+            }
+            
+            // Show "no fields" message if list is empty
+            if (currentMeetingFormFields.length === 0) {
+                const fieldsList = document.getElementById('formFieldsList');
+                fieldsList.innerHTML = '<div class="alert alert-info">No fields added yet. Click "Add Field" to create your first form field.</div>';
+            }
+            
+            updateFormPreview();
+            showToast('Field removed successfully', 'success');
+        }
+        
+        // Update form preview
+        function updateFormPreview() {
+            const preview = document.getElementById('formPreview');
+            
+            if (currentMeetingFormFields.length === 0) {
+                preview.innerHTML = '<p class="text-muted small">No fields added yet</p>';
+                return;
+            }
+            
+            let previewHTML = '<form id="previewForm">';
+            
+            currentMeetingFormFields.forEach((field, index) => {
+                let fieldHTML = '';
+                
+                switch(field.type) {
+                    case 'text':
+                    case 'email':
+                    case 'tel':
+                    case 'number':
+                        fieldHTML = `
+                            <div class="mb-3">
+                                <label class="form-label">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
+                                <input type="${field.type}" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'textarea':
+                        fieldHTML = `
+                            <div class="mb-3">
+                                <label class="form-label">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
+                                <textarea class="form-control" rows="3" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}></textarea>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'select':
+                        let optionsHTML = '<option value="">Select...</option>';
+                        field.options.forEach(option => {
+                            optionsHTML += `<option value="${option}">${option}</option>`;
+                        });
+                        
+                        fieldHTML = `
+                            <div class="mb-3">
+                                <label class="form-label">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
+                                <select class="form-select" ${field.required ? 'required' : ''}>
+                                    ${optionsHTML}
+                                </select>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'radio':
+                        fieldHTML = `
+                            <div class="mb-3">
+                                <label class="form-label">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
+                                ${field.options.map(option => `
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="${field.id}" id="${field.id}_${option}" value="${option}">
+                                        <label class="form-check-label" for="${field.id}_${option}">${option}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'checkbox':
+                        fieldHTML = `
+                            <div class="mb-3">
+                                <label class="form-label">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
+                                ${field.options.map(option => `
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="${field.id}_${option}" value="${option}">
+                                        <label class="form-check-label" for="${field.id}_${option}">${option}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                        break;
+                }
+                
+                previewHTML += fieldHTML;
+            });
+            
+            previewHTML += '<button type="submit" class="btn btn-primary-custom w-100">Submit Attendance</button></form>';
+            preview.innerHTML = previewHTML;
+        }
+        
+        // Tab navigation for create meeting modal
+        function nextTab() {
+            const currentTab = document.querySelector('#meetingTabs .nav-link.active');
+            const tabs = Array.from(document.querySelectorAll('#meetingTabs .nav-link'));
+            const currentIndex = tabs.indexOf(currentTab);
+            
+            if (currentIndex < tabs.length - 1) {
+                const nextTab = tabs[currentIndex + 1];
+                const nextTabPane = document.querySelector(nextTab.getAttribute('data-bs-target'));
+                
+                // Validate current tab before proceeding
+                if (currentIndex === 0) { // Details tab
+                    if (!validateMeetingDetails()) {
+                        showToast('Please fill in all required meeting details', 'error');
+                        return;
+                    }
+                }
+                
+                // Show next tab
+                currentTab.classList.remove('active');
+                currentTab.setAttribute('aria-selected', 'false');
+                
+                nextTab.classList.add('active');
+                nextTab.setAttribute('aria-selected', 'true');
+                
+                // Show next tab content
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                nextTabPane.classList.add('show', 'active');
+            }
+        }
+        
+        function prevTab() {
+            const currentTab = document.querySelector('#meetingTabs .nav-link.active');
+            const tabs = Array.from(document.querySelectorAll('#meetingTabs .nav-link'));
+            const currentIndex = tabs.indexOf(currentTab);
+            
+            if (currentIndex > 0) {
+                const prevTab = tabs[currentIndex - 1];
+                const prevTabPane = document.querySelector(prevTab.getAttribute('data-bs-target'));
+                
+                // Show previous tab
+                currentTab.classList.remove('active');
+                currentTab.setAttribute('aria-selected', 'false');
+                
+                prevTab.classList.add('active');
+                prevTab.setAttribute('aria-selected', 'true');
+                
+                // Show previous tab content
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                prevTabPane.classList.add('show', 'active');
+            }
+        }
+        
+        // Validate meeting details
+        function validateMeetingDetails() {
+            const title = document.getElementById('meetingTitle').value.trim();
+            const locationName = document.getElementById('meetingLocationName').value.trim();
+            const startTime = document.getElementById('meetingStartTime').value;
+            const endTime = document.getElementById('meetingEndTime').value;
+            const latitude = document.getElementById('meetingLatitude').value;
+            const longitude = document.getElementById('meetingLongitude').value;
+            
+            if (!title) {
+                showToast('Meeting title is required', 'error');
+                return false;
+            }
+            
+            if (!locationName) {
+                showToast('Location name is required', 'error');
+                return false;
+            }
+            
+            if (!startTime) {
+                showToast('Start time is required', 'error');
+                return false;
+            }
+            
+            if (!endTime) {
+                showToast('End time is required', 'error');
+                return false;
+            }
+            
+            if (!latitude || !longitude) {
+                showToast('Location coordinates are required', 'error');
+                return false;
+            }
+            
+            return true;
         }
         
         // Register user
@@ -2220,9 +2756,16 @@
             document.getElementById('allowManual').checked = currentOrganization.settings.allowManual;
         }
         
-        // Create meeting
+        // Create meeting (UPDATED with form fields)
         async function createMeeting() {
             try {
+                // Validate meeting details
+                if (!validateMeetingDetails()) {
+                    // Switch back to details tab
+                    document.querySelector('#meetingTabs .nav-link').click();
+                    return;
+                }
+                
                 const meetingData = {
                     title: document.getElementById('meetingTitle').value,
                     description: document.getElementById('meetingDescription').value,
@@ -2243,7 +2786,8 @@
                             ussd: document.getElementById('allowUSSDMeeting').checked,
                             kiosk: document.getElementById('allowKioskMeeting').checked,
                             manual: document.getElementById('allowManualMeeting').checked
-                        }
+                        },
+                        customFormFields: currentMeetingFormFields
                     }
                 };
                 
@@ -2260,16 +2804,20 @@
                     const meeting = await response.json();
                     showToast('Meeting created successfully!', 'success');
                     
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('createMeetingModal'));
-                    modal.hide();
+                    // Generate meeting link and QR code
+                    generateMeetingSharing(meeting);
                     
-                    // Reset form
-                    document.getElementById('createMeetingForm').reset();
+                    // Switch to sharing tab
+                    document.querySelector('#sharing-tab').click();
                     
-                    // Reload meetings
-                    loadMeetings();
-                    loadUpcomingMeetings();
+                    // Enable sharing buttons
+                    document.getElementById('copyLinkBtn').disabled = false;
+                    document.getElementById('testLinkBtn').disabled = false;
+                    document.getElementById('downloadQRBtn').disabled = false;
+                    document.getElementById('shareEmailBtn').disabled = false;
+                    document.getElementById('shareWhatsAppBtn').disabled = false;
+                    document.getElementById('shareSMSBtn').disabled = false;
+                    
                 } else {
                     const error = await response.json();
                     showToast(error.error || 'Failed to create meeting', 'error');
@@ -2278,6 +2826,130 @@
                 console.error('Create meeting error:', error);
                 showToast('Failed to create meeting', 'error');
             }
+        }
+        
+        // Generate meeting sharing link and QR code
+        function generateMeetingSharing(meeting) {
+            // Store meeting code
+            currentMeetingCode = meeting.accessCodes.publicCode;
+            
+            // Generate meeting link
+            generatedMeetingLink = `${FRONTEND_URL}/attend/${currentMeetingCode}`;
+            
+            // Display the link
+            document.getElementById('generatedLink').innerHTML = `
+                <a href="${generatedMeetingLink}" target="_blank">${generatedMeetingLink}</a>
+            `;
+            
+            // Generate QR code
+            generateQRCode(generatedMeetingLink);
+        }
+        
+        // Generate QR code
+        function generateQRCode(text) {
+            const qrContainer = document.getElementById('qrCodeCanvas');
+            qrContainer.innerHTML = '';
+            
+            QRCode.toCanvas(text, { width: 200, margin: 2 }, function(error, canvas) {
+                if (error) {
+                    console.error('QR Code generation error:', error);
+                    qrContainer.innerHTML = '<p class="text-danger">Failed to generate QR code</p>';
+                    return;
+                }
+                
+                canvas.className = 'qr-code-canvas';
+                qrContainer.appendChild(canvas);
+                generatedQRCode = canvas.toDataURL('image/png');
+            });
+        }
+        
+        // Copy meeting link to clipboard
+        function copyMeetingLink() {
+            if (!generatedMeetingLink) {
+                showToast('No meeting link available', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(generatedMeetingLink).then(() => {
+                showToast('Meeting link copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showToast('Failed to copy link', 'error');
+            });
+        }
+        
+        // Test meeting link
+        function testMeetingLink() {
+            if (!generatedMeetingLink) {
+                showToast('No meeting link available', 'error');
+                return;
+            }
+            
+            window.open(generatedMeetingLink, '_blank');
+            showToast('Opening meeting link in new tab', 'info');
+        }
+        
+        // Download QR code
+        function downloadQRCode() {
+            if (!generatedQRCode) {
+                showToast('No QR code available', 'error');
+                return;
+            }
+            
+            const meetingTitle = document.getElementById('meetingTitle').value || 'meeting';
+            const filename = `qr-code-${meetingTitle.replace(/\s+/g, '-').toLowerCase()}.png`;
+            
+            const link = document.createElement('a');
+            link.href = generatedQRCode;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('QR code downloaded successfully!', 'success');
+        }
+        
+        // Share via Email
+        function shareViaEmail() {
+            if (!generatedMeetingLink) {
+                showToast('No meeting link available', 'error');
+                return;
+            }
+            
+            const meetingTitle = document.getElementById('meetingTitle').value || 'Meeting';
+            const subject = `Join ${meetingTitle}`;
+            const body = `You're invited to join ${meetingTitle}. Click the link below to join:\n\n${generatedMeetingLink}\n\nOr scan the attached QR code to join.`;
+            
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+        }
+        
+        // Share via WhatsApp
+        function shareViaWhatsApp() {
+            if (!generatedMeetingLink) {
+                showToast('No meeting link available', 'error');
+                return;
+            }
+            
+            const meetingTitle = document.getElementById('meetingTitle').value || 'Meeting';
+            const text = `Join ${meetingTitle}: ${generatedMeetingLink}`;
+            
+            const whatsappLink = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(whatsappLink, '_blank');
+        }
+        
+        // Share via SMS
+        function shareViaSMS() {
+            if (!generatedMeetingLink) {
+                showToast('No meeting link available', 'error');
+                return;
+            }
+            
+            const meetingTitle = document.getElementById('meetingTitle').value || 'Meeting';
+            const body = `Join ${meetingTitle}: ${generatedMeetingLink}`;
+            
+            const smsLink = `sms:?body=${encodeURIComponent(body)}`;
+            window.location.href = smsLink;
         }
         
         // Create admin
@@ -2359,14 +3031,32 @@
             }
         }
         
-        // Show create meeting modal
+        // Show create meeting modal (UPDATED to reset form builder)
         function showCreateMeetingModal() {
+            // Reset form builder
+            currentMeetingFormFields = [];
+            document.getElementById('formFieldsList').innerHTML = '<div class="alert alert-info">No fields added yet. Click "Add Field" to create your first form field.</div>';
+            updateFormPreview();
+            
+            // Reset sharing section
+            document.getElementById('generatedLink').innerHTML = '<span class="text-muted">Link will be generated after meeting creation</span>';
+            document.getElementById('qrCodeCanvas').innerHTML = '';
+            document.getElementById('copyLinkBtn').disabled = true;
+            document.getElementById('testLinkBtn').disabled = true;
+            document.getElementById('downloadQRBtn').disabled = true;
+            document.getElementById('shareEmailBtn').disabled = true;
+            document.getElementById('shareWhatsAppBtn').disabled = true;
+            document.getElementById('shareSMSBtn').disabled = true;
+            
             // Set default values
             const now = new Date();
             const future = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
             
             document.getElementById('meetingStartTime').value = formatDateTimeLocal(future);
             document.getElementById('meetingEndTime').value = formatDateTimeLocal(new Date(future.getTime() + 2 * 60 * 60 * 1000)); // 2 hours later
+            
+            // Reset to first tab
+            document.querySelector('#meetingTabs .nav-link').click();
             
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('createMeetingModal'));
@@ -2379,21 +3069,162 @@
             modal.show();
         }
         
-        // Show meeting details modal
+        // Show meeting details modal (UPDATED with sharing info)
         function showMeetingDetailsModal(meetingId) {
-            // In a real implementation, you would fetch meeting details by ID
-            // For now, we'll show a placeholder
-            document.getElementById('meetingDetailsContent').innerHTML = `
-                <div class="text-center py-4">
-                    <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
-                    <h5>Meeting Details</h5>
-                    <p class="text-muted">Meeting ID: ${meetingId}</p>
-                    <p>In a full implementation, this would show detailed meeting information, QR code, attendance summary, etc.</p>
-                </div>
-            `;
-            
-            const modal = new bootstrap.Modal(document.getElementById('meetingDetailsModal'));
-            modal.show();
+            // Fetch meeting details
+            fetch(`${API_BASE_URL}/meetings/${meetingId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(meeting => {
+                const startTime = new Date(meeting.schedule.startTime);
+                const endTime = new Date(meeting.schedule.endTime);
+                
+                // Generate sharing link
+                const meetingLink = `${FRONTEND_URL}/attend/${meeting.accessCodes.publicCode}`;
+                
+                let qrCodeHTML = '<p class="text-muted">Generating QR code...</p>';
+                
+                document.getElementById('meetingDetailsContent').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>${meeting.title}</h5>
+                            <p class="text-muted">${meeting.description || 'No description provided'}</p>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-calendar me-2"></i> Schedule</h6>
+                                    <p><strong>Start:</strong> ${startTime.toLocaleString()}</p>
+                                    <p><strong>End:</strong> ${endTime.toLocaleString()}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i> Location</h6>
+                                    <p><strong>Name:</strong> ${meeting.location.name}</p>
+                                    <p><strong>Radius:</strong> ${meeting.location.radius} meters</p>
+                                    <p><strong>Coordinates:</strong> ${meeting.location.latitude.toFixed(6)}, ${meeting.location.longitude.toFixed(6)}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h6><i class="fas fa-tools me-2"></i> Attendance Methods</h6>
+                                <div class="d-flex gap-2 mt-2">
+                                    ${meeting.attendanceConfig.allowedModes.smartphoneGPS ? '<span class="badge bg-primary">GPS</span>' : ''}
+                                    ${meeting.attendanceConfig.allowedModes.sms ? '<span class="badge bg-info">SMS</span>' : ''}
+                                    ${meeting.attendanceConfig.allowedModes.ussd ? '<span class="badge bg-warning">USSD</span>' : ''}
+                                    ${meeting.attendanceConfig.allowedModes.kiosk ? '<span class="badge bg-secondary">Kiosk</span>' : ''}
+                                    ${meeting.attendanceConfig.allowedModes.manual ? '<span class="badge bg-success">Manual</span>' : ''}
+                                </div>
+                            </div>
+                            
+                            ${meeting.attendanceConfig.customFormFields && meeting.attendanceConfig.customFormFields.length > 0 ? `
+                                <div class="mt-4">
+                                    <h6><i class="fas fa-list-alt me-2"></i> Custom Form Fields</h6>
+                                    <ul class="list-group mt-2">
+                                        ${meeting.attendanceConfig.customFormFields.map(field => `
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                ${field.label}
+                                                <span class="badge bg-secondary">${field.type}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="share-section">
+                                <h6><i class="fas fa-share-alt me-2"></i> Share Meeting</h6>
+                                
+                                <div class="mt-3">
+                                    <p class="small text-muted">Meeting Link:</p>
+                                    <div class="share-link mb-3">
+                                        <a href="${meetingLink}" target="_blank">${meetingLink}</a>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 mb-3">
+                                        <button class="btn btn-sm btn-primary-custom" onclick="copyTextToClipboard('${meetingLink}')">
+                                            <i class="fas fa-copy me-1"></i> Copy Link
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 text-center">
+                                    <h6><i class="fas fa-qrcode me-2"></i> QR Code</h6>
+                                    <div id="meetingQRCode" class="mt-2 mb-3">
+                                        ${qrCodeHTML}
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-custom w-100" onclick="downloadMeetingQRCode('${meetingLink}', '${meeting.title}')">
+                                        <i class="fas fa-download me-1"></i> Download QR Code
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h6>Access Codes</h6>
+                                    <div class="mt-2">
+                                        <p class="mb-1"><small>SMS Code:</small> <code>${meeting.accessCodes.smsCode}</code></p>
+                                        <p class="mb-1"><small>USSD Code:</small> <code>${meeting.accessCodes.ussdCode}</code></p>
+                                        <p class="mb-1"><small>Public Code:</small> <code>${meeting.accessCodes.publicCode}</code></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Generate QR code
+                QRCode.toDataURL(meetingLink, { width: 150, margin: 1 }, function(error, url) {
+                    if (!error) {
+                        document.getElementById('meetingQRCode').innerHTML = `<img src="${url}" alt="QR Code" class="img-fluid">`;
+                    }
+                });
+                
+                const modal = new bootstrap.Modal(document.getElementById('meetingDetailsModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Meeting details error:', error);
+                document.getElementById('meetingDetailsContent').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h5>Error Loading Meeting Details</h5>
+                        <p class="text-muted">Failed to load meeting information</p>
+                    </div>
+                `;
+                const modal = new bootstrap.Modal(document.getElementById('meetingDetailsModal'));
+                modal.show();
+            });
+        }
+        
+        // Helper function to copy text to clipboard
+        function copyTextToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showToast('Failed to copy', 'error');
+            });
+        }
+        
+        // Download meeting QR code
+        function downloadMeetingQRCode(link, title) {
+            QRCode.toDataURL(link, { width: 300, margin: 2 }, function(error, url) {
+                if (error) {
+                    showToast('Failed to generate QR code', 'error');
+                    return;
+                }
+                
+                const filename = `qr-code-${title.replace(/\s+/g, '-').toLowerCase()}.png`;
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                showToast('QR code downloaded!', 'success');
+            });
         }
         
         // Export report
