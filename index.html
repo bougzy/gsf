@@ -213,6 +213,89 @@
             font-weight: 600;
             margin-bottom: 1rem;
         }
+
+        /* Add these styles to your existing CSS */
+
+/* Meeting table enhancements */
+.meeting-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.meeting-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Validation progress indicator */
+.validation-indicator {
+    width: 60px;
+    height: 5px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.validation-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #4cc9f0, #4361ee);
+    transition: width 0.3s ease;
+}
+
+/* Success modal animations */
+@keyframes bounceIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-icon {
+    animation: bounceIn 0.6s ease;
+}
+
+/* Section validation states */
+.form-section.valid {
+    border-left: 4px solid #28a745;
+    padding-left: 1rem;
+}
+
+.form-section.invalid {
+    border-left: 4px solid #dc3545;
+    padding-left: 1rem;
+}
+
+/* Required field indicator */
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Disabled button styling */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Meeting table highlight */
+.table-success {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+    transition: background-color 0.5s ease;
+}
+
+/* Section completion check */
+.section-complete {
+    color: #28a745;
+}
+
+.section-incomplete {
+    color: #dc3545;
+}
         
         /* Buttons */
         .btn-primary-custom {
@@ -2686,6 +2769,108 @@
             </div>
         </div>
     </div>
+
+    <!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modal-custom">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title">Meeting Created Successfully! 🎉</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4>Your meeting is now active!</h4>
+                    <p class="text-muted" id="successMeetingTitle"></p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="share-link-container">
+                            <h6><i class="fas fa-link me-2"></i> Meeting Link</h6>
+                            <p class="text-muted small mb-3">Share this link with attendees:</p>
+                            <div class="share-link" id="successMeetingLink">
+                                <span class="text-muted">Loading...</span>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-primary-custom w-100" onclick="copySuccessLink()">
+                                    <i class="fas fa-copy me-1"></i> Copy Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="qr-code-container">
+                            <h6><i class="fas fa-qrcode me-2"></i> QR Code</h6>
+                            <p class="text-muted small mb-3">Scan to join meeting:</p>
+                            <div id="successQRCode"></div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-primary-custom w-100" onclick="downloadSuccessQRCode()">
+                                    <i class="fas fa-download me-1"></i> Download QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6><i class="fas fa-share-alt me-2"></i> Share via</h6>
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <button class="btn btn-sm btn-outline-primary" onclick="shareSuccessViaEmail()">
+                            <i class="fas fa-envelope me-1"></i> Email
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="shareSuccessViaWhatsApp()">
+                            <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="shareSuccessViaSMS()">
+                            <i class="fas fa-sms me-1"></i> SMS
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="shareSuccessViaCopy()">
+                            <i class="fas fa-copy me-1"></i> Copy All
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6><i class="fas fa-key me-2"></i> Access Codes</h6>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <div class="bg-light p-2 rounded text-center">
+                                <small class="text-muted d-block">SMS Code</small>
+                                <code class="fw-bold" id="successSmsCode">----</code>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-2 rounded text-center">
+                                <small class="text-muted d-block">USSD Code</small>
+                                <code class="fw-bold" id="successUssdCode">----</code>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-2 rounded text-center">
+                                <small class="text-muted d-block">Public Code</small>
+                                <code class="fw-bold" id="successPublicCode">----</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Next Steps:</strong> Share the link/QR code with attendees. Monitor attendance in real-time from your dashboard.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary-custom" onclick="goToMeetingDashboard()">
+                    <i class="fas fa-chart-bar me-2"></i> Go to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     
     <!-- Location Test Modal -->
     <div class="modal fade" id="locationTestModal" tabindex="-1">
@@ -3760,39 +3945,253 @@
         }
         
         // Load meetings
-        async function loadMeetings() {
-            try {
-                const status = document.getElementById('meetingStatusFilter').value;
-                const startDate = document.getElementById('meetingStartDate').value;
-                const endDate = document.getElementById('meetingEndDate').value;
-                
-                let url = `${API_BASE_URL}/meetings`;
-                const params = new URLSearchParams();
-                
-                if (status) params.append('status', status);
-                if (startDate) params.append('startDate', startDate);
-                if (endDate) params.append('endDate', endDate);
-                
-                if (params.toString()) {
-                    url += `?${params.toString()}`;
-                }
-                
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const meetings = await response.json();
-                    updateMeetingsTable(meetings);
-                }
-            } catch (error) {
-                console.error('Load meetings error:', error);
-                showToast('Failed to load meetings', 'error');
-            }
+        // Update the loadMeetings function to include actions
+async function loadMeetings() {
+    try {
+        const status = document.getElementById('meetingStatusFilter').value;
+        const startDate = document.getElementById('meetingStartDate').value;
+        const endDate = document.getElementById('meetingEndDate').value;
+        const page = 1; // Add pagination if needed
+        
+        let url = `${API_BASE_URL}/organization/meetings/enhanced?page=${page}`;
+        const params = new URLSearchParams();
+        
+        if (status) params.append('status', status);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        
+        if (params.toString()) {
+            url += `&${params.toString()}`;
         }
         
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            updateMeetingsTable(data.meetings);
+            
+            // Store meetings for reference
+            window.currentMeetings = data.meetings;
+        }
+    } catch (error) {
+        console.error('Load meetings error:', error);
+        showToast('Failed to load meetings', 'error');
+    }
+}
+
+// Update meetings table with enhanced actions
+function updateMeetingsTable(meetings) {
+    const tbody = document.getElementById('meetingsTable');
+    tbody.innerHTML = '';
+    
+    if (meetings.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h5>No meetings found</h5>
+                    <p class="text-muted mb-4">Create your first meeting to get started</p>
+                    <button class="btn btn-primary-custom" onclick="showCreateMeetingModal()">
+                        <i class="fas fa-plus me-2"></i> Create Meeting
+                    </button>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    meetings.forEach(meeting => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-meeting-id', meeting._id);
+        
+        // Format date
+        const startTime = new Date(meeting.schedule.startTime);
+        const dateStr = startTime.toLocaleDateString() + ' ' + startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        // Get attendance methods
+        const methods = [];
+        if (meeting.attendanceConfig?.allowedModes?.smartphoneGPS) methods.push('GPS');
+        if (meeting.attendanceConfig?.allowedModes?.sms) methods.push('SMS');
+        if (meeting.attendanceConfig?.allowedModes?.ussd) methods.push('USSD');
+        if (meeting.attendanceConfig?.allowedModes?.kiosk) methods.push('Kiosk');
+        if (meeting.attendanceConfig?.allowedModes?.manual) methods.push('Manual');
+        
+        // Status badge
+        let statusBadge;
+        switch(meeting.status) {
+            case 'draft': statusBadge = '<span class="badge bg-secondary">Draft</span>'; break;
+            case 'active': statusBadge = '<span class="badge bg-success">Active</span>'; break;
+            case 'in_progress': statusBadge = '<span class="badge bg-primary">In Progress</span>'; break;
+            case 'completed': statusBadge = '<span class="badge bg-info">Completed</span>'; break;
+            case 'cancelled': statusBadge = '<span class="badge bg-danger">Cancelled</span>'; break;
+            default: statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+        }
+        
+        // Validation status indicator
+        let validationBadge = '';
+        if (meeting.status === 'draft') {
+            const completedSections = Object.values(meeting.validationStatus?.sections || {}).filter(v => v).length;
+            const totalSections = Object.keys(meeting.validationStatus?.sections || {}).length;
+            validationBadge = `
+                <div class="progress" style="height: 5px; width: 60px;" title="${completedSections}/${totalSections} sections complete">
+                    <div class="progress-bar bg-info" style="width: ${(completedSections/totalSections)*100}%"></div>
+                </div>
+            `;
+        }
+        
+        row.innerHTML = `
+            <td>
+                <strong>${meeting.title}</strong>
+                ${validationBadge}
+            </td>
+            <td>${dateStr}</td>
+            <td>${meeting.location.name}</td>
+            <td>
+                <div class="d-flex flex-wrap gap-1">
+                    ${methods.map(method => `<span class="badge bg-primary">${method}</span>`).join('')}
+                </div>
+            </td>
+            <td>${statusBadge}</td>
+            <td>${meeting.attendanceCount || 0}</td>
+            <td>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewMeeting('${meeting._id}')" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="editMeeting('${meeting._id}')" 
+                            ${meeting.canBeEdited ? '' : 'disabled'} title="Edit Meeting">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMeeting('${meeting._id}')" 
+                            ${meeting.canBeDeleted ? '' : 'disabled'} title="Delete Meeting">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="activateMeeting('${meeting._id}')" 
+                            ${meeting.status === 'draft' && meeting.validationStatus?.allSectionsComplete ? '' : 'disabled'} 
+                            title="Activate Meeting">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// View meeting details
+async function viewMeeting(meetingId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/meetings/${meetingId}/full`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const meeting = await response.json();
+            showMeetingDetailsModal(meeting);
+        }
+    } catch (error) {
+        console.error('View meeting error:', error);
+        showToast('Failed to load meeting details', 'error');
+    }
+}
+
+// Edit meeting
+async function editMeeting(meetingId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/meetings/${meetingId}/full`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const meeting = await response.json();
+            
+            // Populate the create meeting modal with existing data
+            populateEditMeetingModal(meeting);
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('createMeetingModal'));
+            modal.show();
+        }
+    } catch (error) {
+        console.error('Edit meeting error:', error);
+        showToast('Failed to load meeting for editing', 'error');
+    }
+}
+
+// Activate meeting
+async function activateMeeting(meetingId) {
+    if (!confirm('Are you sure you want to activate this meeting? This will make it available for attendance.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/meetings/${meetingId}/activate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showToast('Meeting activated successfully!', 'success');
+            
+            // Show success modal with sharing options
+            successMeetingData = {
+                meetingId: result.meeting.id,
+                title: result.meeting.title,
+                ...result.modalData
+            };
+            showSuccessModal(successMeetingData);
+            
+            // Reload meetings
+            loadMeetings();
+        } else {
+            const error = await response.json();
+            showToast(error.error || 'Failed to activate meeting', 'error');
+            
+            // Show validation errors if any
+            if (error.validationStatus) {
+                showValidationErrors(error.validationStatus);
+            }
+        }
+    } catch (error) {
+        console.error('Activate meeting error:', error);
+        showToast('Failed to activate meeting', 'error');
+    }
+}
+
+// Show validation errors
+function showValidationErrors(validationStatus) {
+    let errorMessage = 'Please complete the following sections:\n';
+    validationStatus.messages.forEach((msg, index) => {
+        errorMessage += `${index + 1}. ${msg}\n`;
+    });
+    
+    alert(errorMessage);
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Setup create meeting validation
+    setupCreateMeetingValidation();
+    
+    // Load meetings on dashboard load
+    if (authToken) {
+        loadMeetings();
+    }
+});
         // Load upcoming meetings for dashboard
         async function loadUpcomingMeetings() {
             try {
@@ -4401,6 +4800,271 @@
             }
         }
         
+        // Add to your JavaScript
+
+// Global variable to track meeting creation success data
+let successMeetingData = null;
+
+// Modify the createMeeting function to show success modal
+async function createMeeting() {
+    try {
+        // Validate complete meeting creation form
+        if (!validateMeetingCreation()) {
+            return;
+        }
+
+        // Check if all sections are complete before allowing creation
+        const isComplete = await validateMeetingSections();
+        if (!isComplete) {
+            showToast('Please complete all sections before creating meeting', 'error');
+            return;
+        }
+
+        // Show loading
+        showLoading();
+
+        // ... existing create meeting code ...
+
+        if (response.ok) {
+            const meeting = await response.json();
+            
+            // Store success data for modal
+            successMeetingData = {
+                meetingId: meeting._id,
+                title: meeting.title,
+                shareLinks: meeting.shareLinks || generateMeetingLinks(meeting._id, meeting.accessCodes.publicCode),
+                qrCode: meeting.qrCode,
+                accessCodes: meeting.accessCodes
+            };
+            
+            // Show success modal
+            showSuccessModal(successMeetingData);
+            
+            // Don't close the create meeting modal yet
+            // The user will close it after viewing success modal
+        }
+        // ... rest of existing code ...
+    } catch (error) {
+        console.error('Create meeting error:', error);
+        showToast('Failed to create meeting', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Function to validate all sections are complete
+async function validateMeetingSections() {
+    const sections = [
+        validateMeetingDetailsSection(),
+        validateAttendanceFormSection(),
+        validateShareQRCodeSection(),
+        validateAdvancedSettingsSection()
+    ];
+    
+    return sections.every(section => section);
+}
+
+// Individual section validations
+function validateMeetingDetailsSection() {
+    const title = document.getElementById('meetingTitle').value.trim();
+    const locationName = document.getElementById('meetingLocationName').value.trim();
+    const startTime = document.getElementById('meetingStartTime').value;
+    const endTime = document.getElementById('meetingEndTime').value;
+    const latitude = document.getElementById('meetingLatitude').value;
+    const longitude = document.getElementById('meetingLongitude').value;
+    
+    return title && locationName && startTime && endTime && latitude && longitude;
+}
+
+function validateAttendanceFormSection() {
+    const requireForm = document.getElementById('requireForm')?.checked || false;
+    const formFields = currentMeetingFormFields;
+    
+    if (requireForm) {
+        return formFields.length > 0;
+    }
+    return true; // Not required, so always valid
+}
+
+function validateShareQRCodeSection() {
+    // This section is automatically completed when meeting is created
+    return true;
+}
+
+function validateAdvancedSettingsSection() {
+    const gpsEnabled = document.getElementById('allowGPSMeeting').checked;
+    const smsEnabled = document.getElementById('allowSMSMeeting').checked;
+    const ussdEnabled = document.getElementById('allowUSSDMeeting').checked;
+    const kioskEnabled = document.getElementById('allowKioskMeeting').checked;
+    const manualEnabled = document.getElementById('allowManualMeeting').checked;
+    
+    return gpsEnabled || smsEnabled || ussdEnabled || kioskEnabled || manualEnabled;
+}
+
+// Update create meeting button state
+function updateCreateMeetingButtonState() {
+    const createButton = document.querySelector('#createMeetingModal .btn-primary-custom');
+    const isComplete = validateMeetingDetailsSection() && 
+                      validateAttendanceFormSection() && 
+                      validateAdvancedSettingsSection();
+    
+    createButton.disabled = !isComplete;
+    if (isComplete) {
+        createButton.innerHTML = '<i class="fas fa-check-circle me-2"></i> Create Meeting';
+    } else {
+        createButton.innerHTML = '<i class="fas fa-lock me-2"></i> Complete All Sections';
+    }
+}
+
+// Add event listeners to update button state
+function setupCreateMeetingValidation() {
+    const inputs = [
+        'meetingTitle', 'meetingLocationName', 'meetingStartTime', 
+        'meetingEndTime', 'meetingLatitude', 'meetingLongitude'
+    ];
+    
+    inputs.forEach(inputId => {
+        const element = document.getElementById(inputId);
+        if (element) {
+            element.addEventListener('input', updateCreateMeetingButtonState);
+            element.addEventListener('change', updateCreateMeetingButtonState);
+        }
+    });
+    
+    const checkboxes = [
+        'allowGPSMeeting', 'allowSMSMeeting', 'allowUSSDMeeting',
+        'allowKioskMeeting', 'allowManualMeeting', 'requireForm'
+    ];
+    
+    checkboxes.forEach(checkboxId => {
+        const element = document.getElementById(checkboxId);
+        if (element) {
+            element.addEventListener('change', updateCreateMeetingButtonState);
+        }
+    });
+    
+    // Initial state
+    updateCreateMeetingButtonState();
+}
+
+// Show success modal
+function showSuccessModal(data) {
+    document.getElementById('successMeetingTitle').textContent = data.title;
+    document.getElementById('successMeetingLink').innerHTML = 
+        `<a href="${data.shareLinks.attendeeForm}" target="_blank">${data.shareLinks.attendeeForm}</a>`;
+    
+    // Display QR code
+    const qrContainer = document.getElementById('successQRCode');
+    qrContainer.innerHTML = '';
+    if (data.qrCode) {
+        qrContainer.innerHTML = `<img src="${data.qrCode}" alt="QR Code" class="img-fluid">`;
+    } else {
+        // Generate QR code if not provided
+        QRCode.toCanvas(data.shareLinks.attendeeForm, { width: 200, margin: 2 }, function(error, canvas) {
+            if (!error) {
+                canvas.className = 'qr-code-canvas';
+                qrContainer.appendChild(canvas);
+                successMeetingData.generatedQRCode = canvas.toDataURL('image/png');
+            }
+        });
+    }
+    
+    // Display access codes
+    document.getElementById('successSmsCode').textContent = data.accessCodes.smsCode;
+    document.getElementById('successUssdCode').textContent = data.accessCodes.ussdCode;
+    document.getElementById('successPublicCode').textContent = data.accessCodes.publicCode;
+    
+    // Store the meeting link for sharing
+    successMeetingData.meetingLink = data.shareLinks.attendeeForm;
+    
+    // Show modal
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    successModal.show();
+    
+    // Close create meeting modal
+    const createModal = bootstrap.Modal.getInstance(document.getElementById('createMeetingModal'));
+    if (createModal) {
+        createModal.hide();
+    }
+}
+
+// Success modal functions
+function copySuccessLink() {
+    if (successMeetingData?.meetingLink) {
+        navigator.clipboard.writeText(successMeetingData.meetingLink).then(() => {
+            showToast('Meeting link copied to clipboard!', 'success');
+        });
+    }
+}
+
+function downloadSuccessQRCode() {
+    if (successMeetingData?.generatedQRCode) {
+        const link = document.createElement('a');
+        link.href = successMeetingData.generatedQRCode;
+        link.download = `qr-code-${successMeetingData.title.replace(/\s+/g, '-').toLowerCase()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('QR code downloaded!', 'success');
+    }
+}
+
+function shareSuccessViaEmail() {
+    if (successMeetingData?.meetingLink) {
+        const subject = `Join ${successMeetingData.title}`;
+        const body = `You're invited to join ${successMeetingData.title}. Click the link below to join:\n\n${successMeetingData.meetingLink}\n\nOr use these codes:\nSMS: ${successMeetingData.accessCodes.smsCode}\nUSSD: ${successMeetingData.accessCodes.ussdCode}`;
+        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+}
+
+function shareSuccessViaWhatsApp() {
+    if (successMeetingData?.meetingLink) {
+        const text = `Join ${successMeetingData.title}: ${successMeetingData.meetingLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+}
+
+function shareSuccessViaSMS() {
+    if (successMeetingData?.meetingLink) {
+        const body = `Join ${successMeetingData.title}: ${successMeetingData.meetingLink}`;
+        window.location.href = `sms:?body=${encodeURIComponent(body)}`;
+    }
+}
+
+function shareSuccessViaCopy() {
+    if (successMeetingData) {
+        const text = `Meeting: ${successMeetingData.title}\nLink: ${successMeetingData.meetingLink}\nSMS Code: ${successMeetingData.accessCodes.smsCode}\nUSSD Code: ${successMeetingData.accessCodes.ussdCode}`;
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('All meeting details copied!', 'success');
+        });
+    }
+}
+
+function goToMeetingDashboard() {
+    if (successMeetingData?.meetingId) {
+        // Close success modal
+        const successModal = bootstrap.Modal.getInstance(document.getElementById('successModal'));
+        if (successModal) successModal.hide();
+        
+        // Navigate to meetings section
+        showDashboardSection('meetings');
+        
+        // Optionally highlight the new meeting
+        setTimeout(() => {
+            highlightNewMeeting(successMeetingData.meetingId);
+        }, 500);
+    }
+}
+
+function highlightNewMeeting(meetingId) {
+    // This function would highlight the new meeting in the meetings table
+    const row = document.querySelector(`[data-meeting-id="${meetingId}"]`);
+    if (row) {
+        row.classList.add('table-success');
+        setTimeout(() => row.classList.remove('table-success'), 3000);
+    }
+}
+
         // Save settings
         async function saveSettings() {
             try {
