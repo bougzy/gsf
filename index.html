@@ -3362,129 +3362,255 @@
         }
         
         // Create meeting
-        async function createMeeting() {
-            try {
-                // Validate all sections before creating
-                if (!validateAllSections()) {
-                    showToast('Please complete all sections before creating the meeting', 'error');
-                    showSection(1); // Go back to first section
-                    return;
-                }
+        // async function createMeeting() {
+        //     try {
+        //         // Validate all sections before creating
+        //         if (!validateAllSections()) {
+        //             showToast('Please complete all sections before creating the meeting', 'error');
+        //             showSection(1); // Go back to first section
+        //             return;
+        //         }
                 
-                // Show loading state
-                const createBtn = document.getElementById('createMeetingBtn');
-                const originalText = createBtn.innerHTML;
-                createBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creating...';
-                createBtn.disabled = true;
+        //         // Show loading state
+        //         const createBtn = document.getElementById('createMeetingBtn');
+        //         const originalText = createBtn.innerHTML;
+        //         createBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creating...';
+        //         createBtn.disabled = true;
                 
-                // Gather meeting data
-                const meetingData = {
-                    title: document.getElementById('meetingTitle').value.trim(),
-                    description: document.getElementById('meetingDescription').value.trim() || '',
-                    location: {
-                        name: document.getElementById('meetingLocationName').value.trim(),
-                        latitude: parseFloat(document.getElementById('meetingLatitude').value),
-                        longitude: parseFloat(document.getElementById('meetingLongitude').value),
-                        radius: parseInt(document.getElementById('meetingRadius').value),
-                        address: document.getElementById('meetingAddress')?.value.trim() || ''
-                    },
-                    schedule: {
-                        startTime: document.getElementById('meetingStartTime').value,
-                        endTime: document.getElementById('meetingEndTime').value,
-                        bufferBefore: 30,
-                        bufferAfter: 30
-                    },
-                    attendanceConfig: {
-                        allowedModes: {
-                            smartphoneGPS: document.getElementById('allowGPSMeeting').checked,
-                            sms: document.getElementById('allowSMSMeeting').checked,
-                            ussd: document.getElementById('allowUSSDMeeting').checked,
-                            kiosk: document.getElementById('allowKioskMeeting').checked,
-                            manual: document.getElementById('allowManualMeeting').checked
-                        },
-                        requiredFields: currentMeetingFormFields.filter(f => f.required).map(f => ({
-                            field: f.label.toLowerCase().replace(/\s+/g, '_'),
-                            isRequired: true
-                        })),
-                        verificationStrictness: document.getElementById('verificationStrictness').value,
-                        duplicatePrevention: {
-                            preventSameDevice: document.getElementById('preventSameDevice').checked,
-                            preventSamePhone: document.getElementById('preventSamePhone').checked,
-                            preventSameNameTime: document.getElementById('preventSameNameTime').checked,
-                            timeWindowMinutes: parseInt(document.getElementById('duplicateTimeWindow').value) || 5
-                        }
-                    },
-                    customFormFields: currentMeetingFormFields.map(field => ({
-                        fieldName: field.label.toLowerCase().replace(/\s+/g, '_'),
-                        fieldType: field.type,
-                        label: field.label,
-                        placeholder: field.placeholder,
-                        options: field.options.map(opt => ({ value: opt, label: opt })),
-                        isRequired: field.required,
-                        order: currentMeetingFormFields.indexOf(field)
-                    })),
-                    timeVerification: {
-                        requireMinimumStay: document.getElementById('requireMinimumStay').checked,
-                        minimumStayMinutes: parseInt(document.getElementById('minimumStayMinutes').value) || 5,
-                        enableContinuousMonitoring: document.getElementById('enableContinuousMonitoring').checked,
-                        monitoringInterval: parseInt(document.getElementById('monitoringInterval').value) || 5,
-                        maxAllowedAbsence: 2,
-                        autoVerifyAfterStay: false,
-                        autoVerifyMinutes: 10
-                    },
-                    pwaSettings: {
-                        enablePWA: document.getElementById('enablePWA').checked,
-                        appName: document.getElementById('appName').value,
-                        themeColor: document.getElementById('themeColor').value,
-                        backgroundColor: document.getElementById('backgroundColor').value
-                    }
-                };
+        //         // Gather meeting data
+        //         const meetingData = {
+        //             title: document.getElementById('meetingTitle').value.trim(),
+        //             description: document.getElementById('meetingDescription').value.trim() || '',
+        //             location: {
+        //                 name: document.getElementById('meetingLocationName').value.trim(),
+        //                 latitude: parseFloat(document.getElementById('meetingLatitude').value),
+        //                 longitude: parseFloat(document.getElementById('meetingLongitude').value),
+        //                 radius: parseInt(document.getElementById('meetingRadius').value),
+        //                 address: document.getElementById('meetingAddress')?.value.trim() || ''
+        //             },
+        //             schedule: {
+        //                 startTime: document.getElementById('meetingStartTime').value,
+        //                 endTime: document.getElementById('meetingEndTime').value,
+        //                 bufferBefore: 30,
+        //                 bufferAfter: 30
+        //             },
+        //             attendanceConfig: {
+        //                 allowedModes: {
+        //                     smartphoneGPS: document.getElementById('allowGPSMeeting').checked,
+        //                     sms: document.getElementById('allowSMSMeeting').checked,
+        //                     ussd: document.getElementById('allowUSSDMeeting').checked,
+        //                     kiosk: document.getElementById('allowKioskMeeting').checked,
+        //                     manual: document.getElementById('allowManualMeeting').checked
+        //                 },
+        //                 requiredFields: currentMeetingFormFields.filter(f => f.required).map(f => ({
+        //                     field: f.label.toLowerCase().replace(/\s+/g, '_'),
+        //                     isRequired: true
+        //                 })),
+        //                 verificationStrictness: document.getElementById('verificationStrictness').value,
+        //                 duplicatePrevention: {
+        //                     preventSameDevice: document.getElementById('preventSameDevice').checked,
+        //                     preventSamePhone: document.getElementById('preventSamePhone').checked,
+        //                     preventSameNameTime: document.getElementById('preventSameNameTime').checked,
+        //                     timeWindowMinutes: parseInt(document.getElementById('duplicateTimeWindow').value) || 5
+        //                 }
+        //             },
+        //             customFormFields: currentMeetingFormFields.map(field => ({
+        //                 fieldName: field.label.toLowerCase().replace(/\s+/g, '_'),
+        //                 fieldType: field.type,
+        //                 label: field.label,
+        //                 placeholder: field.placeholder,
+        //                 options: field.options.map(opt => ({ value: opt, label: opt })),
+        //                 isRequired: field.required,
+        //                 order: currentMeetingFormFields.indexOf(field)
+        //             })),
+        //             timeVerification: {
+        //                 requireMinimumStay: document.getElementById('requireMinimumStay').checked,
+        //                 minimumStayMinutes: parseInt(document.getElementById('minimumStayMinutes').value) || 5,
+        //                 enableContinuousMonitoring: document.getElementById('enableContinuousMonitoring').checked,
+        //                 monitoringInterval: parseInt(document.getElementById('monitoringInterval').value) || 5,
+        //                 maxAllowedAbsence: 2,
+        //                 autoVerifyAfterStay: false,
+        //                 autoVerifyMinutes: 10
+        //             },
+        //             pwaSettings: {
+        //                 enablePWA: document.getElementById('enablePWA').checked,
+        //                 appName: document.getElementById('appName').value,
+        //                 themeColor: document.getElementById('themeColor').value,
+        //                 backgroundColor: document.getElementById('backgroundColor').value
+        //             }
+        //         };
                 
-                const response = await fetch(`${API_BASE_URL}/meetings`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(meetingData)
-                });
+        //         const response = await fetch(`${API_BASE_URL}/meetings`, {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'Authorization': `Bearer ${authToken}`
+        //             },
+        //             body: JSON.stringify(meetingData)
+        //         });
                 
-                if (response.ok) {
-                    const meeting = await response.json();
+        //         if (response.ok) {
+        //             const meeting = await response.json();
                     
-                    // Store meeting data for success modal
-                    currentMeetingData = meeting;
+        //             // Store meeting data for success modal
+        //             currentMeetingData = meeting;
                     
-                    // Show success modal with QR code and links
-                    showMeetingSuccessModal(meeting);
+        //             // Show success modal with QR code and links
+        //             showMeetingSuccessModal(meeting);
                     
-                    // Close create meeting modal
-                    const createModal = bootstrap.Modal.getInstance(document.getElementById('createMeetingModal'));
-                    createModal.hide();
+        //             // Close create meeting modal
+        //             const createModal = bootstrap.Modal.getInstance(document.getElementById('createMeetingModal'));
+        //             createModal.hide();
                     
-                    // Reset form
-                    resetMeetingForm();
+        //             // Reset form
+        //             resetMeetingForm();
                     
-                    // Reload meetings list
-                    loadMeetings();
-                    loadUpcomingMeetings();
-                    loadDashboardData();
+        //             // Reload meetings list
+        //             loadMeetings();
+        //             loadUpcomingMeetings();
+        //             loadDashboardData();
                     
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Failed to create meeting', 'error');
-                }
-            } catch (error) {
-                console.error('Create meeting error:', error);
-                showToast('Failed to create meeting. Please try again.', 'error');
-            } finally {
-                // Reset button state
-                const createBtn = document.getElementById('createMeetingBtn');
-                createBtn.innerHTML = '<i class="fas fa-calendar-plus me-2"></i> Create Meeting';
-                createBtn.disabled = false;
-            }
-        }
+        //         } else {
+        //             const error = await response.json();
+        //             showToast(error.error || 'Failed to create meeting', 'error');
+        //         }
+        //     } catch (error) {
+        //         console.error('Create meeting error:', error);
+        //         showToast('Failed to create meeting. Please try again.', 'error');
+        //     } finally {
+        //         // Reset button state
+        //         const createBtn = document.getElementById('createMeetingBtn');
+        //         createBtn.innerHTML = '<i class="fas fa-calendar-plus me-2"></i> Create Meeting';
+        //         createBtn.disabled = false;
+        //     }
+        // }
         
+        // Create meeting - UPDATED VERSION
+async function createMeeting() {
+    try {
+        // Validate all sections before creating
+        if (!validateAllSections()) {
+            showToast('Please complete all sections before creating the meeting', 'error');
+            showSection(1); // Go back to first section
+            return;
+        }
+
+        // Show loading state
+        const createBtn = document.getElementById('createMeetingBtn');
+        const originalText = createBtn.innerHTML;
+        createBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creating...';
+        createBtn.disabled = true;
+
+        // Gather meeting data
+        const meetingData = {
+            title: document.getElementById('meetingTitle').value.trim(),
+            description: document.getElementById('meetingDescription').value.trim() || '',
+            location: {
+                name: document.getElementById('meetingLocationName').value.trim(),
+                latitude: parseFloat(document.getElementById('meetingLatitude').value),
+                longitude: parseFloat(document.getElementById('meetingLongitude').value),
+                radius: parseInt(document.getElementById('meetingRadius').value),
+                address: document.getElementById('meetingAddress')?.value.trim() || ''
+            },
+            schedule: {
+                startTime: document.getElementById('meetingStartTime').value,
+                endTime: document.getElementById('meetingEndTime').value,
+                bufferBefore: 30,
+                bufferAfter: 30
+            },
+            attendanceConfig: {
+                allowedModes: {
+                    smartphoneGPS: document.getElementById('allowGPSMeeting').checked,
+                    sms: document.getElementById('allowSMSMeeting').checked,
+                    ussd: document.getElementById('allowUSSDMeeting').checked,
+                    kiosk: document.getElementById('allowKioskMeeting').checked,
+                    manual: document.getElementById('allowManualMeeting').checked
+                },
+                requiredFields: currentMeetingFormFields.filter(f => f.required).map(f => ({
+                    field: f.label.toLowerCase().replace(/\s+/g, '_'),
+                    isRequired: true
+                })),
+                verificationStrictness: document.getElementById('verificationStrictness').value,
+                duplicatePrevention: {
+                    preventSameDevice: document.getElementById('preventSameDevice').checked,
+                    preventSamePhone: document.getElementById('preventSamePhone').checked,
+                    preventSameNameTime: document.getElementById('preventSameNameTime').checked,
+                    timeWindowMinutes: parseInt(document.getElementById('duplicateTimeWindow').value) || 5
+                }
+            },
+            customFormFields: currentMeetingFormFields.map(field => ({
+                fieldName: field.label.toLowerCase().replace(/\s+/g, '_'),
+                fieldType: field.type,
+                label: field.label,
+                placeholder: field.placeholder,
+                options: field.options.map(opt => ({ value: opt, label: opt })),
+                isRequired: field.required,
+                order: currentMeetingFormFields.indexOf(field)
+            })),
+            timeVerification: {
+                requireMinimumStay: document.getElementById('requireMinimumStay').checked,
+                minimumStayMinutes: parseInt(document.getElementById('minimumStayMinutes').value) || 5,
+                enableContinuousMonitoring: document.getElementById('enableContinuousMonitoring').checked,
+                monitoringInterval: parseInt(document.getElementById('monitoringInterval').value) || 5,
+                maxAllowedAbsence: 2,
+                autoVerifyAfterStay: false,
+                autoVerifyMinutes: 10
+            },
+            pwaSettings: {
+                enablePWA: document.getElementById('enablePWA').checked,
+                appName: document.getElementById('appName').value,
+                themeColor: document.getElementById('themeColor').value,
+                backgroundColor: document.getElementById('backgroundColor').value
+            }
+        };
+
+        const response = await fetch(`${API_BASE_URL}/meetings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(meetingData)
+        });
+
+        const responseData = await response.json();
+        
+        if (response.ok) {
+            // Store meeting data for success modal
+            currentMeetingData = responseData;
+            
+            // Show success modal with QR code and links
+            showMeetingSuccessModal(responseData);
+            
+            // Close create meeting modal
+            const createModal = bootstrap.Modal.getInstance(document.getElementById('createMeetingModal'));
+            if (createModal) {
+                createModal.hide();
+            }
+            
+            // Reset form
+            resetMeetingForm();
+            
+            // Reload meetings list
+            loadMeetings();
+            loadUpcomingMeetings();
+            loadDashboardData();
+            
+        } else {
+            showToast(responseData.error || 'Failed to create meeting', 'error');
+        }
+    } catch (error) {
+        console.error('Create meeting error:', error);
+        showToast('Failed to create meeting. Please check your connection and try again.', 'error');
+    } finally {
+        // Reset button state
+        const createBtn = document.getElementById('createMeetingBtn');
+        createBtn.innerHTML = '<i class="fas fa-calendar-plus me-2"></i> Create Meeting';
+        createBtn.disabled = false;
+    }
+}
+
+
         // Reset meeting form
         function resetMeetingForm() {
             // Reset form fields
@@ -3550,30 +3676,80 @@
         }
         
         // Show meeting success modal
-        function showMeetingSuccessModal(meeting) {
-            // Update modal content with meeting data
-            document.getElementById('successMeetingTitle').textContent = meeting.title;
-            document.getElementById('successSmsCode').textContent = meeting.accessCodes?.smsCode || 'N/A';
-            document.getElementById('successUssdCode').textContent = meeting.accessCodes?.ussdCode || 'N/A';
-            document.getElementById('successPublicCode').textContent = meeting.accessCodes?.publicCode || 'N/A';
+        // function showMeetingSuccessModal(meeting) {
+        //     // Update modal content with meeting data
+        //     document.getElementById('successMeetingTitle').textContent = meeting.title;
+        //     document.getElementById('successSmsCode').textContent = meeting.accessCodes?.smsCode || 'N/A';
+        //     document.getElementById('successUssdCode').textContent = meeting.accessCodes?.ussdCode || 'N/A';
+        //     document.getElementById('successPublicCode').textContent = meeting.accessCodes?.publicCode || 'N/A';
             
-            // Generate meeting link
-            const meetingLink = `${FRONTEND_URL}/attend/${meeting.accessCodes?.publicCode}`;
-            generatedMeetingLink = meetingLink;
+        //     // Generate meeting link
+        //     const meetingLink = `${FRONTEND_URL}/attend/${meeting.accessCodes?.publicCode}`;
+        //     generatedMeetingLink = meetingLink;
             
-            // Display the link
-            document.getElementById('successGeneratedLink').innerHTML = `
-                <a href="${meetingLink}" target="_blank" class="text-decoration-none">${meetingLink}</a>
-            `;
+        //     // Display the link
+        //     document.getElementById('successGeneratedLink').innerHTML = `
+        //         <a href="${meetingLink}" target="_blank" class="text-decoration-none">${meetingLink}</a>
+        //     `;
             
-            // Generate QR code
-            generateSuccessQRCode(meetingLink);
+        //     // Generate QR code
+        //     generateSuccessQRCode(meetingLink);
             
-            // Show modal
-            const successModal = new bootstrap.Modal(document.getElementById('meetingSuccessModal'));
-            successModal.show();
-        }
+        //     // Show modal
+        //     const successModal = new bootstrap.Modal(document.getElementById('meetingSuccessModal'));
+        //     successModal.show();
+        // }
         
+
+        // Show meeting success modal - UPDATED VERSION
+async function showMeetingSuccessModal(meeting) {
+    try {
+        // Update modal content with meeting data
+        document.getElementById('successMeetingTitle').textContent = meeting.title;
+        
+        // Generate meeting link (using the correct format)
+        const meetingLink = `${FRONTEND_URL}/attend/${meeting.accessCodes?.publicCode || meeting.accessCodes?.publicCode}`;
+        generatedMeetingLink = meetingLink;
+        
+        // Display the link
+        document.getElementById('successGeneratedLink').innerHTML = `
+            <a href="${meetingLink}" target="_blank" class="text-decoration-none">${meetingLink}</a>
+        `;
+        
+        // Generate QR code
+        generateSuccessQRCode(meetingLink);
+        
+        // Check and display codes (with fallbacks)
+        document.getElementById('successSmsCode').textContent = 
+            meeting.accessCodes?.smsCode || 
+            meeting.smsCode || 
+            `MTG-${meeting._id.toString().slice(-6).toUpperCase()}`;
+        
+        document.getElementById('successUssdCode').textContent = 
+            meeting.accessCodes?.ussdCode || 
+            meeting.ussdCode || 
+            meeting._id.toString().slice(-6).toUpperCase();
+        
+        document.getElementById('successPublicCode').textContent = 
+            meeting.accessCodes?.publicCode || 
+            meeting.publicCode || 
+            meeting._id.toString().slice(-8).toUpperCase();
+        
+        // Store meeting data for later use
+        currentMeetingData = meeting;
+        currentMeetingCode = meeting.accessCodes?.publicCode || meeting._id.toString().slice(-8).toUpperCase();
+        
+        // Show modal
+        const successModal = new bootstrap.Modal(document.getElementById('meetingSuccessModal'));
+        successModal.show();
+        
+    } catch (error) {
+        console.error('Show success modal error:', error);
+        showToast('Failed to generate meeting links. Please refresh and try again.', 'error');
+    }
+}
+
+
         // Generate QR code for success modal
         function generateSuccessQRCode(text) {
             const qrContainer = document.getElementById('successQrCodeCanvas');
